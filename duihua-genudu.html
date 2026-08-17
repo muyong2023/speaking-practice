@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中文对话跟读练习</title>
+<style>
+#duiHua{
+  --ink:#20242b; --ink-2:#5c6472; --ink-3:#8b93a1;
+  --line:#e3e7ec; --paper:#fff; --bg:#f2f4f7;
+  --red:#c8443c; --red-2:#fbeceb;
+  --green:#2f8f5b; --green-2:#e9f5ee;
+  --amber:#b9791f; --amber-2:#fdf3e2;
+  --blue:#3a6ea8; --blue-2:#eaf1f9;
+  color:var(--ink); background:var(--bg);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.6; min-height:100vh;
+}
+#duiHua *{box-sizing:border-box;}
+#duiHua button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;}
+#duiHua textarea,#duiHua select,#duiHua input{font-family:inherit;font-size:inherit;color:inherit;}
+html,body{margin:0;padding:0;background:#f2f4f7;}
+
+/* 顶栏 */
+#duiHua .dh-top{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:16px 22px;background:var(--paper);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20;
+}
+#duiHua .dh-logo{
+  font-family:"Songti SC","STSong","Source Han Serif SC","SimSun",serif;
+  font-size:21px;font-weight:700;letter-spacing:.12em;
+}
+#duiHua .dh-logo em{font-style:normal;color:var(--red);}
+#duiHua .dh-sub{color:var(--ink-3);font-size:12.5px;}
+#duiHua .dh-grow{flex:1;}
+
+#duiHua .dh-btn{
+  border:1px solid var(--line);background:var(--paper);border-radius:10px;
+  padding:8px 15px;font-weight:600;transition:.15s;
+}
+#duiHua .dh-btn:hover{border-color:var(--ink-3);}
+#duiHua .dh-btn:disabled{opacity:.45;cursor:not-allowed;}
+#duiHua .dh-btn.primary{background:var(--red);border-color:var(--red);color:#fff;}
+#duiHua .dh-btn.primary:hover{background:#b13a33;border-color:#b13a33;}
+#duiHua .dh-btn.sm{padding:5px 11px;font-size:12.5px;border-radius:8px;font-weight:500;}
+#duiHua button:focus-visible,#duiHua select:focus-visible,#duiHua textarea:focus-visible{
+  outline:2px solid var(--red);outline-offset:2px;
+}
+
+/* 布局 */
+#duiHua .dh-wrap{max-width:920px;margin:0 auto;padding:20px 18px 90px;}
+
+/* 设置条 */
+#duiHua .dh-bar{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;margin-bottom:16px;
+}
+#duiHua .dh-field{display:flex;align-items:center;gap:7px;}
+#duiHua .dh-field label{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.04em;}
+#duiHua select{
+  border:1px solid var(--line);border-radius:9px;padding:6px 9px;background:#fbfcfd;font-size:13px;
+}
+#duiHua .dh-seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+#duiHua .dh-seg button{border:0;background:#fbfcfd;padding:6px 12px;font-size:13px;color:var(--ink-2);}
+#duiHua .dh-seg button[aria-pressed="true"]{background:var(--red-2);color:var(--red);font-weight:700;}
+#duiHua input[type=range]{width:96px;accent-color:var(--red);}
+
+/* 提示条 */
+#duiHua .dh-note{
+  display:flex;gap:9px;align-items:flex-start;padding:11px 14px;border-radius:11px;
+  font-size:13px;margin-bottom:16px;background:var(--blue-2);border:1px solid #d5e2f0;color:#2c4f76;
+}
+#duiHua .dh-note.warn{background:var(--amber-2);border-color:#f0dfbc;color:#7d5411;}
+#duiHua .dh-note[hidden]{display:none;}
+#duiHua .dh-note b{display:block;margin-bottom:2px;}
+
+/* 对话行 */
+#duiHua .dh-line{
+  display:flex;gap:12px;background:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:14px 15px;margin-bottom:11px;transition:.18s;
+}
+#duiHua .dh-line.mine{border-color:#f0d5d2;background:#fffcfb;}
+#duiHua .dh-line.active{border-color:var(--red);box-shadow:0 0 0 3px var(--red-2);}
+#duiHua .dh-line.speaking{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-2);}
+#duiHua .dh-who{
+  flex:0 0 38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  font-weight:700;font-size:15px;background:var(--blue-2);color:var(--blue);
+}
+#duiHua .dh-line.mine .dh-who{background:var(--red-2);color:var(--red);}
+#duiHua .dh-body{flex:1;min-width:0;}
+#duiHua .dh-role{font-size:11.5px;color:var(--ink-3);margin-bottom:5px;letter-spacing:.05em;}
+#duiHua .dh-role b{color:var(--red);font-weight:700;}
+
+/* 汉字 + 拼音 */
+#duiHua .dh-zh{display:flex;flex-wrap:wrap;align-items:flex-end;gap:1px;margin-bottom:5px;}
+#duiHua .dh-tk{display:flex;flex-direction:column;align-items:center;padding:1px 2px;border-radius:5px;}
+#duiHua .dh-py{font-size:11px;color:var(--ink-3);line-height:1.3;height:15px;}
+#duiHua .dh-ch{
+  font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC",serif;
+  font-size:25px;line-height:1.28;
+}
+#duiHua .dh-tk.punct .dh-ch{font-family:inherit;font-size:20px;color:var(--ink-3);}
+#duiHua .dh-tk.ok{background:var(--green-2);}
+#duiHua .dh-tk.ok .dh-ch{color:var(--green);}
+#duiHua .dh-tk.bad{background:var(--red-2);}
+#duiHua .dh-tk.bad .dh-ch{color:var(--red);}
+#duiHua .dh-tk.miss{background:#f1f3f5;}
+#duiHua .dh-tk.miss .dh-ch{color:var(--ink-3);text-decoration:line-through;}
+#duiHua .dh-en{font-size:12.5px;color:var(--ink-3);margin-bottom:9px;}
+#duiHua .hide-py .dh-py{display:none;}
+#duiHua .hide-en .dh-en{display:none;}
+
+#duiHua .dh-acts{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+#duiHua .dh-rec{border-color:#e8c0bc;color:var(--red);font-weight:600;}
+#duiHua .dh-rec.on{background:var(--red);border-color:var(--red);color:#fff;}
+#duiHua .dh-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin-right:5px;
+  animation:dhblink 1s infinite;
+}
+@keyframes dhblink{50%{opacity:.25;}}
+
+/* 结果 */
+#duiHua .dh-result{
+  margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+#duiHua .dh-result[hidden]{display:none;}
+#duiHua .dh-ring{flex:0 0 62px;position:relative;}
+#duiHua .dh-ring svg{transform:rotate(-90deg);}
+#duiHua .dh-ring span{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:17px;font-weight:700;
+}
+#duiHua .dh-tips{flex:1;min-width:0;font-size:13px;}
+#duiHua .dh-tips ul{margin:0;padding-left:17px;}
+#duiHua .dh-tips li{margin:3px 0;color:var(--ink-2);}
+#duiHua .dh-tips li b{color:var(--ink);}
+#duiHua .dh-heard{font-size:12px;color:var(--ink-3);margin-bottom:6px;}
+#duiHua .dh-heard code{
+  font-family:inherit;background:#f1f3f5;border-radius:5px;padding:1px 6px;color:var(--ink-2);
+}
+#duiHua .dh-selfrate{display:flex;gap:6px;margin-top:7px;}
+
+/* 报告 */
+#duiHua .dh-report{
+  position:fixed;left:0;right:0;bottom:0;background:var(--paper);
+  border-top:1px solid var(--line);padding:11px 20px;z-index:15;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  box-shadow:0 -4px 18px rgba(28,36,50,.06);
+}
+#duiHua .dh-stat{font-size:13px;color:var(--ink-2);}
+#duiHua .dh-stat b{font-size:17px;color:var(--ink);margin-right:3px;}
+#duiHua .dh-bar-mini{
+  flex:1;min-width:110px;height:7px;border-radius:99px;background:#eef0f3;overflow:hidden;
+}
+#duiHua .dh-bar-mini i{display:block;height:100%;width:0;background:var(--red);transition:width .35s;}
+
+/* 自定义对话 */
+#duiHua .dh-custom{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;
+}
+#duiHua .dh-custom[hidden]{display:none;}
+#duiHua .dh-custom textarea{
+  width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;background:#fbfcfd;line-height:1.9;resize:vertical;
+}
+#duiHua .dh-hint{font-size:11.5px;color:var(--ink-3);margin-top:7px;line-height:1.7;}
+@media (max-width:560px){
+  #duiHua .dh-ch{font-size:22px;}
+  #duiHua .dh-wrap{padding:14px 12px 96px;}
+}
+@media (prefers-reduced-motion:reduce){#duiHua *{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div id="duiHua">
+
+<header class="dh-top">
+  <div class="dh-logo">对话<em>跟读</em></div>
+  <div class="dh-sub">听 → 跟读 → 录音 → 回放对比 → 改进重测</div>
+  <div class="dh-grow"></div>
+  <button class="dh-btn" id="dh-mic">🎤 启用麦克风</button>
+  <button class="dh-btn" id="dh-toggle-custom">自编对话</button>
+  <button class="dh-btn primary" id="dh-playall">▶ 播放整段</button>
+</header>
+
+<div class="dh-wrap">
+
+  <div class="dh-note warn" id="dh-warn" hidden></div>
+
+  <div class="dh-bar">
+    <div class="dh-field"><label>对话</label>
+      <select id="dh-pick"></select></div>
+    <div class="dh-field"><label>我演</label>
+      <div class="dh-seg" id="dh-role">
+        <button data-v="A" aria-pressed="true">A</button>
+        <button data-v="B" aria-pressed="false">B</button>
+        <button data-v="all" aria-pressed="false">全部</button>
+      </div></div>
+    <div class="dh-field"><label>语速</label>
+      <input type="range" id="dh-rate" min="0.5" max="1.2" step="0.05" value="0.92"></div>
+    <div class="dh-field"><label>音色</label>
+      <span id="dh-voiceinfo" style="font-size:12px;color:var(--ink-3);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">普通话</span>
+      <button class="dh-btn sm" id="dh-test">试听</button></div>
+    <div class="dh-field"><label>显示</label>
+      <div class="dh-seg" id="dh-show">
+        <button data-v="py" aria-pressed="true">拼音</button>
+        <button data-v="en" aria-pressed="true">英文</button>
+      </div></div>
+  </div>
+
+  <div class="dh-custom" id="dh-custom" hidden>
+    <textarea id="dh-custom-text" spellcheck="false" placeholder="A: 你好，你叫什么名字？&#10;B: 我叫王小美。&#10;A: 你今年多大？"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="dh-btn primary" id="dh-custom-go">用这段对话练习</button>
+    </div>
+    <div class="dh-hint">每行一句，用 <code>A:</code> / <code>B:</code> 开头标出说话人。自编对话不带拼音和翻译，评分照常工作。</div>
+  </div>
+
+  <div id="dh-lines"></div>
+</div>
+
+<div class="dh-report">
+  <div class="dh-stat"><b id="dh-done">0</b>/<span id="dh-total">0</span> 句已练</div>
+  <div class="dh-stat">平均 <b id="dh-avg">—</b></div>
+  <div class="dh-bar-mini"><i id="dh-prog"></i></div>
+  <button class="dh-btn sm" id="dh-reset">清空记录</button>
+</div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var $ = function(id){ return document.getElementById(id); };
+var root = $("duiHua");
+
+/* ============================================================
+   对话素材（py 与非标点汉字一一对应）
+   ============================================================ */
+var DIALOGS = [
+  { id:"meet", title:"初次见面", roles:{A:"m", B:"f"}, lines:[
+    {s:"A", zh:"你好！我叫李明。", py:"nǐ hǎo wǒ jiào lǐ míng", en:"Hi! My name is Li Ming."},
+    {s:"B", zh:"你好，李明！我是王小美。", py:"nǐ hǎo lǐ míng wǒ shì wáng xiǎo měi", en:"Hi, Li Ming! I'm Wang Xiaomei."},
+    {s:"A", zh:"认识你很高兴。", py:"rèn shi nǐ hěn gāo xìng", en:"Nice to meet you."},
+    {s:"B", zh:"我也很高兴。你是哪国人？", py:"wǒ yě hěn gāo xìng nǐ shì nǎ guó rén", en:"Me too. What country are you from?"},
+    {s:"A", zh:"我是美国人。你呢？", py:"wǒ shì měi guó rén nǐ ne", en:"I'm American. And you?"},
+    {s:"B", zh:"我是中国人，我住在北京。", py:"wǒ shì zhōng guó rén wǒ zhù zài běi jīng", en:"I'm Chinese, I live in Beijing."},
+    {s:"A", zh:"太好了！我们做朋友吧。", py:"tài hǎo le wǒ men zuò péng you ba", en:"Great! Let's be friends."},
+    {s:"B", zh:"好啊！这是我的电话号码。", py:"hǎo a zhè shì wǒ de diàn huà hào mǎ", en:"Sure! Here's my phone number."}
+  ]},
+  { id:"food", title:"在餐厅点菜", roles:{A:"f", B:"m"}, lines:[
+    {s:"A", zh:"欢迎光临！你想吃什么？", py:"huān yíng guāng lín nǐ xiǎng chī shén me", en:"Welcome! What would you like to eat?"},
+    {s:"B", zh:"我想吃一碗牛肉面。", py:"wǒ xiǎng chī yì wǎn niú ròu miàn", en:"I'd like a bowl of beef noodles."},
+    {s:"A", zh:"你要喝什么饮料？", py:"nǐ yào hē shén me yǐn liào", en:"What would you like to drink?"},
+    {s:"B", zh:"请给我一杯热茶。", py:"qǐng gěi wǒ yì bēi rè chá", en:"A cup of hot tea, please."},
+    {s:"A", zh:"好的，请稍等。", py:"hǎo de qǐng shāo děng", en:"Okay, one moment please."},
+    {s:"B", zh:"谢谢！一共多少钱？", py:"xiè xie yí gòng duō shao qián", en:"Thanks! How much altogether?"},
+    {s:"A", zh:"一共二十五块。", py:"yí gòng èr shí wǔ kuài", en:"Twenty-five yuan in total."},
+    {s:"B", zh:"给你钱。再见！", py:"gěi nǐ qián zài jiàn", en:"Here you go. Goodbye!"}
+  ]},
+  { id:"road", title:"问路", roles:{A:"m", B:"f"}, lines:[
+    {s:"A", zh:"请问，地铁站在哪里？", py:"qǐng wèn dì tiě zhàn zài nǎ lǐ", en:"Excuse me, where is the subway station?"},
+    {s:"B", zh:"一直往前走，然后向右拐。", py:"yì zhí wǎng qián zǒu rán hòu xiàng yòu guǎi", en:"Go straight ahead, then turn right."},
+    {s:"A", zh:"离这里远吗？", py:"lí zhè lǐ yuǎn ma", en:"Is it far from here?"},
+    {s:"B", zh:"不远，走路十分钟就到。", py:"bù yuǎn zǒu lù shí fēn zhōng jiù dào", en:"Not far, ten minutes on foot."},
+    {s:"A", zh:"我可以坐公共汽车吗？", py:"wǒ kě yǐ zuò gōng gòng qì chē ma", en:"Can I take the bus?"},
+    {s:"B", zh:"可以，你坐三路车。", py:"kě yǐ nǐ zuò sān lù chē", en:"Yes, take bus number three."},
+    {s:"A", zh:"太谢谢你了！", py:"tài xiè xie nǐ le", en:"Thank you so much!"},
+    {s:"B", zh:"不客气，祝你好运！", py:"bú kè qi zhù nǐ hǎo yùn", en:"You're welcome, good luck!"}
+  ]}
+];
+
+/* ============================================================
+   能力检测
+   ============================================================ */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var hasTTS = "speechSynthesis" in window;
+var hasMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && !!window.MediaRecorder;
+
+(function(){
+  var msgs = [];
+  if(location.protocol === "file:"){
+    msgs.push("当前是用 file:// 直接打开本地文件，Chrome 不会记住麦克风授权，每次录音都会重新弹窗。用本地服务器或 https 地址打开就只需授权一次。");
+  }
+  if(!hasTTS) msgs.push("这个浏览器不支持朗读，示范音频放不出来。");
+  if(!hasMic) msgs.push("录音不可用——需要 https 页面并允许麦克风权限；如果嵌在 iframe 里，父页面的 iframe 标签要加 allow=\"microphone\"。");
+  if(!SR) msgs.push("这个浏览器不支持语音识别，自动评分关闭，改成录音＋自评模式。Chrome 或 Edge 支持。");
+  if(msgs.length){
+    var w = $("dh-warn");
+    w.hidden = false;
+    w.innerHTML = "<div><b>先看一眼</b>" + msgs.join("<br>") + "</div>";
+  }
+})();
+
+/* ============================================================
+   语音合成
+   ============================================================ */
+var voices = [], voiceA = null, voiceB = null;
+
+/* 音色排序：神经网络语音 > 网络语音 > 系统自带的老合成器 */
+var GOOD = [
+  /Xiaoxiao|Yunxi|Xiaoyi|Yunyang|Yunjian|Xiaochen|Xiaohan/i,  // 微软 Neural
+  /Google\s*普通话|Google.*Mandarin/i,                          // Chrome 网络语音
+  /Huihui|Yaoyao|Kangkang/i                                    // 微软旧版
+];
+var MEH = /Ting-?Ting|Tingting|Sinji|Mei-?Jia|Yu-?shu|Li-?mu/i; // 系统自带拼接式
+
+function voiceScore(v){
+  var s = 0;
+  if(v.localService === false) s += 40;
+  if(/Neural|Natural|Online|Wavenet|Premium|Enhanced/i.test(v.name)) s += 35;
+  GOOD.forEach(function(re, i){ if(re.test(v.name)) s += (GOOD.length - i) * 10; });
+  if(MEH.test(v.name)) s -= 25;
+  if(/^zh[-_]?CN|zh[-_]Hans/i.test(v.lang)) s += 10;
+  if(/zh[-_]?TW|Hant/i.test(v.lang)) s -= 12;
+  return s;
+}
+
+var MALE_RE   = /Yunxi|Yunjian|Yunyang|Yunfeng|Yunhao|Yunze|Kangkang|Li-?mu|云希|云健|云扬|康康/i;
+var FEMALE_RE = /Xiaoxiao|Xiaoyi|Xiaochen|Xiaohan|Xiaomo|Xiaoxuan|Ting-?Ting|Tingting|Mei-?Jia|Yaoyao|Huihui|Yu-?shu|Lilian|晓晓|婷婷/i;
+var voiceM = null, voiceF = null;
+
+function assignVoices(){
+  voiceM = voices.find(function(v){ return MALE_RE.test(v.name); }) || null;
+  voiceF = voices.find(function(v){ return FEMALE_RE.test(v.name) || /Google/i.test(v.name); })
+        || voices.find(function(v){ return v !== voiceM; }) || null;
+  voiceA = voiceF || voiceM || voices[0] || null;   // 兜底
+  voiceB = voiceM || voiceF || voices[0] || null;
+
+  var el = $("dh-voiceinfo");
+  if(!el) return;
+  if(!voices.length){ el.textContent = "这台设备没有普通话语音"; return; }
+  function clean(n){ return n.replace(/\s*\(.*?\)\s*$/, ""); }
+  if(voiceM && voiceF) el.textContent = "普通话 · 男 " + clean(voiceM.name) + " / 女 " + clean(voiceF.name);
+  else if(voiceF) el.textContent = "普通话 · " + clean(voiceF.name) + "（无男声，男角色用音高模拟）";
+  else el.textContent = "普通话 · " + clean(voiceB.name);
+}
+
+var CANTO = /zh[-_]?HK|yue|粤|粵|廣東|广东|Cantonese|Sinji|Aa-?sing/i;
+function isMandarin(v){
+  if(!/^(zh|cmn)/i.test(v.lang)) return false;
+  if(CANTO.test(v.lang) || CANTO.test(v.name)) return false;
+  return true;
+}
+
+function pickVoices(){
+  voices = (hasTTS ? speechSynthesis.getVoices() : [])
+    .filter(isMandarin)
+    .sort(function(a, b){ return voiceScore(b) - voiceScore(a); });
+  assignVoices();
+}
+if(hasTTS){
+  pickVoices();
+  speechSynthesis.onvoiceschanged = pickVoices;
+  setTimeout(pickVoices, 800); // 部分浏览器语音列表加载偏慢
+}
+
+/* 优先播放 audio/<对话id>-<句号>.mp3，没有就回落到浏览器合成 */
+var audioMiss = {};
+function playLine(idx){
+  var line = state.dialog.lines[idx];
+  if(!line) return Promise.resolve();
+  var key = state.dialog.id + "-" + (idx + 1);
+  if(audioMiss[key]) return speak(line.zh, line.s);
+
+  return new Promise(function(res){
+    var done = false;
+    function fall(){
+      if(done) return;
+      done = true;
+      audioMiss[key] = true;
+      speak(line.zh, line.s).then(res);
+    }
+    var a = new Audio("audio/" + key + ".mp3");
+    curAudio = a;
+    a.playbackRate = Math.min(1.1, parseFloat($("dh-rate").value) + 0.1);
+    a.onended = function(){ if(!done){ done = true; res(); } };
+    a.onerror = fall;
+    var p = a.play();
+    if(p && p.catch) p.catch(fall);
+  });
+}
+var curAudio = null;
+function stopAudio(){
+  if(curAudio){ try{ curAudio.pause(); }catch(e){} curAudio = null; }
+}
+
+function speak(text, who){
+  return new Promise(function(res){
+    if(!hasTTS) return res();
+    var done = false;
+    function finish(){ if(!done){ done = true; res(); } }
+
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-CN";
+    u.rate = parseFloat($("dh-rate").value);
+    var want = (state.dialog.roles && state.dialog.roles[who]) || (who === "B" ? "f" : "m");
+    var v = (want === "m" ? voiceM : voiceF) || voiceF || voiceM || voices[0] || null;
+    if(v) u.voice = v;
+    // 设备上没有对应性别的音色时，用音高粗略模拟
+    var faked = (want === "m" && v !== voiceM) || (want === "f" && v !== voiceF);
+    u.pitch = faked ? (want === "m" ? 0.7 : 1.12) : 1;
+    if(faked && want === "m") u.rate = u.rate * 0.96;
+    u.onend = finish;
+    u.onerror = finish;
+    speechSynthesis.speak(u);
+    // Chrome 用网络语音时偶尔不回调 onend，兜个底
+    setTimeout(finish, 1200 + text.length * 420);
+  });
+}
+
+/* ============================================================
+   文本处理
+   ============================================================ */
+var PUNCT = /[，。！？、：；""''（）《》…—\s,.!?:;"'()]/;
+function isHan(c){ return /[\u4e00-\u9fff\u3400-\u4dbf]/.test(c); }
+
+function tokenize(zh, py){
+  var syl = (py || "").trim() ? py.trim().split(/\s+/) : [];
+  var k = 0, out = [];
+  for(var i = 0; i < zh.length; i++){
+    var c = zh[i];
+    if(isHan(c)) out.push({ch:c, py: syl[k++] || "", han:true});
+    else if(!/\s/.test(c)) out.push({ch:c, py:"", han:false});
+  }
+  return out;
+}
+function hanOnly(s){
+  var out = "";
+  for(var i = 0; i < s.length; i++) if(isHan(s[i])) out += s[i];
+  return out;
+}
+function toneOf(py){
+  if(/[āēīōūǖ]/.test(py)) return 1;
+  if(/[áéíóúǘ]/.test(py)) return 2;
+  if(/[ǎěǐǒǔǚ]/.test(py)) return 3;
+  if(/[àèìòùǜ]/.test(py)) return 4;
+  return 0;
+}
+var TONE_NAME = ["轻声","一声（高平）","二声（上扬）","三声（先降后升）","四声（下降）"];
+
+/* 对齐：编辑距离回溯，得到每个目标字的状态 */
+function align(target, said){
+  var n = target.length, m = said.length;
+  var dp = [], bt = [];
+  for(var i = 0; i <= n; i++){
+    dp.push(new Array(m + 1).fill(0));
+    bt.push(new Array(m + 1).fill(""));
+    dp[i][0] = i; bt[i][0] = "d";
+  }
+  for(var j = 0; j <= m; j++){ dp[0][j] = j; bt[0][j] = "i"; }
+  bt[0][0] = "";
+  for(i = 1; i <= n; i++){
+    for(j = 1; j <= m; j++){
+      var same = target[i-1] === said[j-1];
+      var best = dp[i-1][j-1] + (same ? 0 : 1), op = same ? "m" : "s";
+      if(dp[i-1][j] + 1 < best){ best = dp[i-1][j] + 1; op = "d"; }
+      if(dp[i][j-1] + 1 < best){ best = dp[i][j-1] + 1; op = "i"; }
+      dp[i][j] = best; bt[i][j] = op;
+    }
+  }
+  var res = new Array(n), extra = 0;
+  i = n; j = m;
+  while(i > 0 || j > 0){
+    var op2 = bt[i][j];
+    if(op2 === "m"){ res[i-1] = {st:"ok"}; i--; j--; }
+    else if(op2 === "s"){ res[i-1] = {st:"bad", heard:said[j-1]}; i--; j--; }
+    else if(op2 === "d"){ res[i-1] = {st:"miss"}; i--; }
+    else { extra++; j--; }
+  }
+  return {marks:res, extra:extra};
+}
+
+/* ============================================================
+   状态
+   ============================================================ */
+var state = { dialog:DIALOGS[0], myRole:"A", showPy:true, showEn:true };
+var scores = {};   // lineIndex -> 最好成绩
+var recNode = null;
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function renderPicker(){
+  var sel = $("dh-pick");
+  sel.innerHTML = "";
+  DIALOGS.forEach(function(d){
+    var o = document.createElement("option");
+    o.value = d.id; o.textContent = d.title;
+    sel.appendChild(o);
+  });
+  sel.value = state.dialog.id;
+}
+
+function render(){
+  var host = $("dh-lines");
+  host.innerHTML = "";
+  root.classList.toggle("hide-py", !state.showPy);
+  root.classList.toggle("hide-en", !state.showEn);
+
+  state.dialog.lines.forEach(function(line, idx){
+    var isRole = line.s === state.myRole;                       // 配色和统计
+    var mine = state.myRole === "all" || isRole;                // 是否计入进度
+    var el = document.createElement("div");
+    el.className = "dh-line" + (isRole ? " mine" : "");
+    el.dataset.idx = idx;
+
+    var who = document.createElement("div");
+    who.className = "dh-who"; who.textContent = line.s;
+
+    var body = document.createElement("div");
+    body.className = "dh-body";
+
+    var role = document.createElement("div");
+    role.className = "dh-role";
+    role.innerHTML = state.myRole === "all"
+      ? ("角色 " + line.s)
+      : (isRole ? "<b>我说</b>" : "对方 · 也可以练");
+    body.appendChild(role);
+
+    var zh = document.createElement("div");
+    zh.className = "dh-zh";
+    tokenize(line.zh, line.py).forEach(function(t){
+      var sp = document.createElement("span");
+      sp.className = "dh-tk" + (t.han ? "" : " punct");
+      sp.innerHTML = '<span class="dh-py">' + (t.py || "") + '</span><span class="dh-ch">' + t.ch + '</span>';
+      zh.appendChild(sp);
+    });
+    body.appendChild(zh);
+
+    if(line.en){
+      var en = document.createElement("div");
+      en.className = "dh-en"; en.textContent = line.en;
+      body.appendChild(en);
+    }
+
+    var acts = document.createElement("div");
+    acts.className = "dh-acts";
+
+    var bListen = document.createElement("button");
+    bListen.className = "dh-btn sm";
+    bListen.textContent = "🔊 听示范";
+    bListen.addEventListener("click", function(){
+      highlight(el, "speaking");
+      playLine(idx).then(function(){ el.classList.remove("speaking"); });
+    });
+    acts.appendChild(bListen);
+
+    {
+      var bRec = document.createElement("button");
+      bRec.className = "dh-btn sm dh-rec";
+      bRec.textContent = "🎤 跟读录音";
+      bRec.disabled = !hasMic;
+      bRec.addEventListener("click", function(){ toggleRecord(idx, line, el, bRec); });
+      acts.appendChild(bRec);
+
+      var bMine = document.createElement("button");
+      bMine.className = "dh-btn sm";
+      bMine.textContent = "▶ 听我的";
+      bMine.disabled = true;
+      bMine.dataset.role = "playmine";
+      bMine.addEventListener("click", function(){
+        var rec = scores[idx];
+        if(rec && rec.url){ new Audio(rec.url).play(); }
+      });
+      acts.appendChild(bMine);
+
+      var bAB = document.createElement("button");
+      bAB.className = "dh-btn sm";
+      bAB.textContent = "⇄ 原声 / 我的";
+      bAB.disabled = true;
+      bAB.dataset.role = "ab";
+      bAB.addEventListener("click", function(){
+        var rec = scores[idx];
+        if(!rec || !rec.url) return;
+        highlight(el, "speaking");
+        playLine(idx).then(function(){
+          el.classList.remove("speaking");
+          setTimeout(function(){ new Audio(rec.url).play(); }, 350);
+        });
+      });
+      acts.appendChild(bAB);
+    }
+
+    body.appendChild(acts);
+
+    var result = document.createElement("div");
+    result.className = "dh-result";
+    result.hidden = true;
+    body.appendChild(result);
+
+    el.appendChild(who); el.appendChild(body);
+    host.appendChild(el);
+
+    if(scores[idx]) paintResult(idx);
+  });
+
+  updateReport();
+}
+
+function highlight(el, cls){
+  Array.prototype.forEach.call(document.querySelectorAll("#duiHua .dh-line"), function(x){
+    x.classList.remove("speaking","active");
+  });
+  el.classList.add(cls);
+}
+
+/* ============================================================
+   录音 + 评分
+   ============================================================ */
+var live = null;
+var micStream = null;
+
+/* 只申请一次麦克风，之后复用；空闲时把音轨静音而不是关掉 */
+function getMic(){
+  if(micStream && micStream.active){
+    micStream.getTracks().forEach(function(t){ t.enabled = true; });
+    return Promise.resolve(micStream);
+  }
+  return navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+    micStream = s;
+    updateMicBtn();
+    return s;
+  });
+}
+function idleMic(){
+  if(micStream) micStream.getTracks().forEach(function(t){ t.enabled = false; });
+}
+function releaseMic(){
+  if(micStream){
+    micStream.getTracks().forEach(function(t){ t.stop(); });
+    micStream = null;
+  }
+  updateMicBtn();
+}
+function updateMicBtn(){
+  var b = $("dh-mic");
+  if(!b) return;
+  var on = !!(micStream && micStream.active);
+  b.textContent = on ? "🎤 麦克风已就绪" : "🎤 启用麦克风";
+  b.style.borderColor = on ? "#bfe0cd" : "";
+  b.style.color = on ? "var(--green)" : "";
+}
+
+function toggleRecord(idx, line, el, btn){
+  if(live && live.idx === idx){ stopRecord(); return; }
+  if(live) stopRecord();
+  startRecord(idx, line, el, btn);
+}
+
+function startRecord(idx, line, el, btn){
+  highlight(el, "active");
+  btn.classList.add("on");
+  btn.innerHTML = '<span class="dh-dot"></span>说完了，停止';
+
+  live = {idx:idx, line:line, el:el, btn:btn, chunks:[], said:"", t0:Date.now(), stream:null, rec:null, sr:null, ended:false};
+
+  getMic().then(function(stream){
+    if(!live) { idleMic(); return; }
+    live.stream = stream;
+    var rec = new MediaRecorder(stream);
+    live.rec = rec;
+    rec.ondataavailable = function(e){ if(e.data.size) live.chunks.push(e.data); };
+    rec.onstop = function(){ setTimeout(finishRecord, 450); };
+    rec.start();
+
+    if(SR){
+      var sr = new SR();
+      live.sr = sr;
+      sr.lang = "zh-CN";
+      sr.continuous = true;      // 中间停顿不算说完
+      sr.interimResults = false;
+      sr.maxAlternatives = 3;
+      live.parts = [[], [], []]; // 三个候选各自累积片段
+
+      sr.onresult = function(e){
+        if(!live) return;
+        for(var i = e.resultIndex; i < e.results.length; i++){
+          var r = e.results[i];
+          if(!r.isFinal) continue;
+          for(var k = 0; k < 3; k++){
+            live.parts[k].push(((r[k] || r[0]) || {}).transcript || "");
+          }
+        }
+        live.alts = live.parts.map(function(p){ return p.join(""); });
+        live.said = live.alts[0] || "";
+      };
+      // 引擎自己断了就续上，除非用户已经点了停止
+      sr.onend = function(){
+        if(live && !live.ended){
+          try{ sr.start(); }catch(err){}
+        }
+      };
+      sr.onerror = function(){};
+      try{ sr.start(); }catch(err){}
+    }
+    live.timer = setTimeout(stopRecord, 20000);   // 兜底上限
+  }).catch(function(err){
+    btn.classList.remove("on");
+    btn.textContent = "🎤 跟读录音";
+    live = null;
+    var w = $("dh-warn");
+    w.hidden = false;
+    w.innerHTML = "<div><b>拿不到麦克风</b>浏览器拒绝了录音权限（" + err.name + "）。如果页面嵌在 iframe 里，父页面的 iframe 需要写 allow=\"microphone\"；直接开新标签页最稳。</div>";
+  });
+}
+
+function stopRecord(){
+  if(!live || live.ended) return;
+  live.ended = true;
+  clearTimeout(live.timer);
+  try{ if(live.sr) live.sr.stop(); }catch(e){}
+  if(live.rec && live.rec.state !== "inactive") live.rec.stop();
+  else finishRecord();
+}
+
+function finishRecord(){
+  var L = live; live = null;
+  if(!L) return;
+  if(L.stream) idleMic();
+  L.btn.classList.remove("on");
+  L.btn.textContent = "🎤 重新录";
+
+  var blob = new Blob(L.chunks, {type:"audio/webm"});
+  var url = L.chunks.length ? URL.createObjectURL(blob) : null;
+  var secs = (Date.now() - L.t0) / 1000;
+
+  var target = hanOnly(L.line.zh);
+  var best = null;
+  (L.alts && L.alts.length ? L.alts : [L.said]).forEach(function(a){
+    var said = hanOnly(a || "");
+    var r = align(target.split(""), said.split(""));
+    var ok = r.marks.filter(function(m){ return m.st === "ok"; }).length;
+    var sc = target.length ? Math.max(0, Math.round(ok / target.length * 100) - Math.min(15, r.extra * 4)) : 0;
+    if(!best || sc > best.score) best = {score:sc, marks:r.marks, extra:r.extra, said:said, raw:a};
+  });
+
+  var prev = scores[L.idx];
+  var rec = {
+    url: url,
+    score: best ? best.score : 0,
+    marks: best ? best.marks : null,
+    said: best ? best.said : "",
+    secs: secs,
+    scored: !!SR && !!(best && best.said),
+    best: prev && prev.score > (best ? best.score : 0) ? prev.score : (best ? best.score : 0)
+  };
+  if(prev && prev.url && prev.url !== url) URL.revokeObjectURL(prev.url);
+  scores[L.idx] = rec;
+
+  paintResult(L.idx);
+  updateReport();
+}
+
+function paintResult(idx){
+  var el = document.querySelector('#duiHua .dh-line[data-idx="' + idx + '"]');
+  if(!el) return;
+  var rec = scores[idx];
+  var line = state.dialog.lines[idx];
+  var box = el.querySelector(".dh-result");
+  box.hidden = false;
+  box.innerHTML = "";
+
+  Array.prototype.forEach.call(el.querySelectorAll("[data-role]"), function(b){ b.disabled = !rec.url; });
+
+  var toks = tokenize(line.zh, line.py);
+  var zhWrap = el.querySelector(".dh-zh");
+  var spans = zhWrap.querySelectorAll(".dh-tk");
+  var k = 0;
+  toks.forEach(function(t, i){
+    spans[i].classList.remove("ok","bad","miss");
+    if(t.han && rec.marks){
+      var m = rec.marks[k++];
+      if(m) spans[i].classList.add(m.st);
+    }
+  });
+
+  if(rec.scored){
+    var color = rec.score >= 85 ? "var(--green)" : rec.score >= 65 ? "var(--amber)" : "var(--red)";
+    var ring = document.createElement("div");
+    ring.className = "dh-ring";
+    var C = 2 * Math.PI * 26;
+    ring.innerHTML =
+      '<svg width="62" height="62" viewBox="0 0 62 62">' +
+      '<circle cx="31" cy="31" r="26" fill="none" stroke="#eef0f3" stroke-width="7"/>' +
+      '<circle cx="31" cy="31" r="26" fill="none" stroke="' + color + '" stroke-width="7" stroke-linecap="round" ' +
+      'stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - rec.score / 100)) + '"/></svg>' +
+      '<span style="color:' + color + '">' + rec.score + '</span>';
+    box.appendChild(ring);
+  }
+
+  var tips = document.createElement("div");
+  tips.className = "dh-tips";
+  box.appendChild(tips);
+
+  if(!rec.scored){
+    tips.innerHTML = '<div class="dh-heard">已录音。这个浏览器没有自动评分，先听「⇄ 原声 / 我的」对比，再自己打个分：</div>';
+    var rate = document.createElement("div");
+    rate.className = "dh-selfrate";
+    [["很像 👍", 95], ["还行 🙂", 78], ["再练 🔁", 55]].forEach(function(p){
+      var b = document.createElement("button");
+      b.className = "dh-btn sm";
+      b.textContent = p[0];
+      b.addEventListener("click", function(){
+        rec.score = p[1]; rec.scored = true;
+        rec.best = Math.max(rec.best || 0, p[1]);
+        paintResult(idx); updateReport();
+      });
+      rate.appendChild(b);
+    });
+    tips.appendChild(rate);
+    return;
+  }
+
+  var heard = document.createElement("div");
+  heard.className = "dh-heard";
+  heard.innerHTML = rec.said
+    ? "听到的是：<code>" + rec.said + "</code>"
+    : "没识别到内容。";
+  tips.appendChild(heard);
+
+  var ul = document.createElement("ul");
+  advice(rec, line).forEach(function(t){
+    var li = document.createElement("li");
+    li.innerHTML = t;
+    ul.appendChild(li);
+  });
+  tips.appendChild(ul);
+}
+
+function advice(rec, line){
+  var out = [];
+  var toks = tokenize(line.zh, line.py).filter(function(t){ return t.han; });
+  var pyOf = {};
+  toks.forEach(function(t, i){ pyOf[i] = t.py; });
+
+  if(!rec.said){
+    out.push("<b>没听清</b>——离麦克风近一点，说完整句再按停止，周围别太吵。");
+    return out;
+  }
+
+  var miss = [], bad = [];
+  (rec.marks || []).forEach(function(m, i){
+    if(m.st === "miss") miss.push({ch:toks[i].ch, py:pyOf[i]});
+    if(m.st === "bad") bad.push({ch:toks[i].ch, py:pyOf[i], heard:m.heard});
+  });
+
+  if(rec.score >= 95){
+    out.push("<b>非常准。</b>下一步试着加快到正常语速，别一字一顿。");
+  }else if(rec.score >= 85){
+    out.push("<b>基本没问题。</b>再对照原声抠一下语调起伏。");
+  }
+
+  bad.slice(0, 3).forEach(function(b){
+    var t = toneOf(b.py);
+    var tip = "「<b>" + b.ch + "</b>」被听成了「" + b.heard + "」";
+    if(b.py) tip += "，正确读音 <b>" + b.py + "</b>" + (t ? "，" + TONE_NAME[t] : "");
+    out.push(tip + "。慢速念三遍再连起来。");
+  });
+
+  miss.slice(0, 3).forEach(function(b){
+    out.push("漏掉了「<b>" + b.ch + "</b>」" + (b.py ? "（" + b.py + "）" : "") + "——这个字容易吞音，刻意读重一点。");
+  });
+
+  if(rec.extra > 1) out.push("多出了 " + rec.extra + " 个音节，可能是重复或者中间有犹豫的语气词。");
+
+  var han = hanOnly(line.zh).length;
+  var per = rec.secs / Math.max(1, han);
+  if(per > 0.75) out.push("语速偏慢（约 " + rec.secs.toFixed(1) + " 秒）。先按原声速度整句连读，别逐字停顿。");
+  else if(per < 0.22) out.push("语速偏快，字有点糊。放慢到示范音的速度，把每个音节咬清楚。");
+
+  if(out.length === 0) out.push("发音可以，多录两遍把语调练稳。");
+  return out;
+}
+
+/* ============================================================
+   报告
+   ============================================================ */
+function updateReport(){
+  var mineIdx = [];
+  state.dialog.lines.forEach(function(l, i){
+    if(state.myRole === "all" || l.s === state.myRole) mineIdx.push(i);
+  });
+  var done = mineIdx.filter(function(i){ return scores[i] && scores[i].scored; });
+  var sum = done.reduce(function(a, i){ return a + (scores[i].best || scores[i].score); }, 0);
+
+  $("dh-done").textContent = done.length;
+  $("dh-total").textContent = mineIdx.length;
+  $("dh-avg").textContent = done.length ? Math.round(sum / done.length) : "—";
+  $("dh-prog").style.width = (mineIdx.length ? done.length / mineIdx.length * 100 : 0) + "%";
+}
+
+/* ============================================================
+   整段播放
+   ============================================================ */
+var playing = false;
+$("dh-playall").addEventListener("click", function(){
+  if(playing){
+    playing = false;
+    stopAudio();
+    if(hasTTS) speechSynthesis.cancel();
+    this.textContent = "▶ 播放整段";
+    Array.prototype.forEach.call(document.querySelectorAll("#duiHua .dh-line"), function(x){
+      x.classList.remove("speaking");
+    });
+    return;
+  }
+  playing = true;
+  this.textContent = "■ 停止";
+  var i = 0, self = this;
+  (function next(){
+    if(!playing || i >= state.dialog.lines.length){
+      playing = false; self.textContent = "▶ 播放整段";
+      Array.prototype.forEach.call(document.querySelectorAll("#duiHua .dh-line"), function(x){
+        x.classList.remove("speaking");
+      });
+      return;
+    }
+    var line = state.dialog.lines[i];
+    var el = document.querySelector('#duiHua .dh-line[data-idx="' + i + '"]');
+    highlight(el, "speaking");
+    el.scrollIntoView({block:"center", behavior:"smooth"});
+    i++;
+    playLine(i - 1).then(function(){ setTimeout(next, 420); });
+  })();
+});
+
+/* ============================================================
+   控件
+   ============================================================ */
+$("dh-pick").addEventListener("change", function(e){
+  state.dialog = DIALOGS.find(function(d){ return d.id === e.target.value; }) || DIALOGS[0];
+  scores = {};
+  render();
+});
+$("dh-role").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-v]");
+  if(!b) return;
+  Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+    x.setAttribute("aria-pressed", String(x === b));
+  });
+  state.myRole = b.dataset.v;
+  render();
+});
+$("dh-show").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-v]");
+  if(!b) return;
+  var on = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", String(on));
+  if(b.dataset.v === "py") state.showPy = on; else state.showEn = on;
+  root.classList.toggle("hide-py", !state.showPy);
+  root.classList.toggle("hide-en", !state.showEn);
+});
+$("dh-mic").addEventListener("click", function(){
+  if(micStream && micStream.active){ releaseMic(); return; }
+  getMic().then(idleMic).catch(function(err){
+    var w = $("dh-warn");
+    w.hidden = false;
+    w.innerHTML = "<div><b>拿不到麦克风</b>浏览器拒绝了录音权限（" + err.name + "）。</div>";
+  });
+});
+$("dh-mic").disabled = !hasMic;
+window.addEventListener("pagehide", releaseMic);
+
+$("dh-test").addEventListener("click", function(){
+  speak("你好，我是老师，今天我们练习中文对话。", "A").then(function(){
+    setTimeout(function(){ speak("好的，我准备好了，我们开始吧。", "B"); }, 300);
+  });
+});
+$("dh-toggle-custom").addEventListener("click", function(){
+  var c = $("dh-custom");
+  c.hidden = !c.hidden;
+});
+$("dh-custom-go").addEventListener("click", function(){
+  var raw = $("dh-custom-text").value.trim();
+  if(!raw) return;
+  var lines = raw.split(/\n+/).map(function(s){
+    var m = s.match(/^\s*([ABab甲乙])\s*[:：]\s*(.+)$/);
+    if(m) return {s: /[Aa甲]/.test(m[1]) ? "A" : "B", zh: m[2].trim(), py:"", en:""};
+    return {s:"A", zh:s.trim(), py:"", en:""};
+  }).filter(function(l){ return hanOnly(l.zh).length; });
+  if(!lines.length) return;
+  var d = {id:"custom", title:"自编对话", lines:lines};
+  DIALOGS = DIALOGS.filter(function(x){ return x.id !== "custom"; }).concat([d]);
+  state.dialog = d;
+  scores = {};
+  renderPicker();
+  $("dh-pick").value = "custom";
+  $("dh-custom").hidden = true;
+  render();
+});
+$("dh-reset").addEventListener("click", function(){
+  Object.keys(scores).forEach(function(k){ if(scores[k].url) URL.revokeObjectURL(scores[k].url); });
+  scores = {};
+  render();
+});
+
+/* 启动 */
+renderPicker();
+render();
+
+})();
+</script>
+</body>
+</html>
